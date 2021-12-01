@@ -1,24 +1,49 @@
 import logo from './logo.svg';
 import './App.css';
+import { Col, Container, Row, Button } from 'react-bootstrap';
+import { useEffect, useState, useRef } from 'react';
+import ContactTable from './components/ContactTable';
 
 function App() {
+  const [contacts, setContacts] = useState([]);
+  const [filteredList, setFilteredList] = useState([]);
+  const searchBoxRef = useRef();
+
+  useEffect(() => {
+    fetch('https://jsonplaceholder.typicode.com/users').then((response) =>
+      response.json().then((users) => {
+        setContacts(users);
+        setFilteredList(users);
+      })
+    );
+  }, []);
+
+  const handleOnChange = () => {
+    const str = searchBoxRef.current.value;
+    const filteredContacts = contacts.filter((contact) =>
+      contact.name.toLowerCase().includes(str.toLowerCase())
+    );
+    setFilteredList(filteredContacts);
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container className="mt-5">
+      <Row>
+        <Col>
+          <div className="text-center py-2">
+            <input ref={searchBoxRef} type="text" onChange={handleOnChange} />
+          </div>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          {filteredList.length ? (
+            <ContactTable users={filteredList} />
+          ) : (
+            <h2>No Contact Found.</h2>
+          )}
+        </Col>
+      </Row>
+    </Container>
   );
 }
 
